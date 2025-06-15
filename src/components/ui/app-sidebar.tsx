@@ -5,7 +5,6 @@ import {
   Monitor,
   Server,
   SquareArrowOutUpRight,
-  Users,
 } from "lucide-react";
 import { NavUser } from "@/components/ui/nav-user";
 import { TeamSwitcher } from "@/components/ui/team-switcher";

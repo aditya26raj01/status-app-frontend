@@ -1,6 +1,5 @@
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -11,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { fetchClient } from "@/fetch-client";
 import { Incident, useIncidentsStore } from "@/stores/useIncidentsStore";
-import { Service, useServiceStore } from "@/stores/useServiceStore";
 import { Loader2, Trash } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
