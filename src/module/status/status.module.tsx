@@ -46,7 +46,9 @@ export default function StatusModule() {
   useEffect(() => {
     if (!loading) {
       // Set up WebSocket connection
-      const socket = new WebSocket("ws://localhost:8000/ws");
+      const socket = new WebSocket(
+        `ws://${process.env.NEXT_PUBLIC_API_URL}/ws`
+      );
 
       socket.onopen = () => {
         console.log("WebSocket connection established");
