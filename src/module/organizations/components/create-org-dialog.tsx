@@ -41,7 +41,7 @@ export default function CreateOrgDialog({
         body: JSON.stringify({ name, domain, org_slug: orgSlug }),
         headers: { "Content-Type": "application/json" },
       });
-      setOrgs([...(orgs ?? []), response]);
+      setOrgs([...(orgs || []), response]);
       setOpen(false);
       setName("");
       setDomain("");

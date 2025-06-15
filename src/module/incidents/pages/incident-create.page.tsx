@@ -11,9 +11,85 @@ import { Textarea } from "@/components/ui/textarea";
 import React from "react";
 import AddUpdates from "../components/add-update";
 import { Separator } from "@/components/ui/separator";
-import { sampleService1, sampleService2 } from "../incidents.module";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+
+export interface Service {
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  created_by: string;
+}
+
+export interface IncidentUpdate {
+  title: string;
+  status: string;
+  created_at: string;
+  created_by: string;
+}
+
+// Sample data for IncidentUpdate
+export const sampleUpdate1: IncidentUpdate = {
+  title: "Initial Report",
+  status: "investigating",
+  created_at: "2023-10-02T09:00:00Z",
+  created_by: "reporter@example.com",
+};
+
+export const sampleUpdate2: IncidentUpdate = {
+  title: "Issue Identified",
+  status: "identified",
+  created_at: "2023-10-02T10:00:00Z",
+  created_by: "engineer@example.com",
+};
+
+export const sampleUpdate3: IncidentUpdate = {
+  title: "Resolved",
+  status: "resolved",
+  created_at: "2023-10-02T11:00:00Z",
+  created_by: "admin@example.com",
+};
+
+export interface Incident {
+  title: string;
+  status: string;
+  impact: string;
+  description: string;
+  components_affected: Service[];
+  created_at: string;
+  created_by: string;
+  updates: IncidentUpdate[];
+}
+
+// Sample data for Service
+export const sampleService1: Service = {
+  title: "Authentication Service",
+  description: "Handles user authentication and authorization.",
+  status: "operational",
+  created_at: "2023-10-01T10:00:00Z",
+  created_by: "admin@example.com",
+};
+
+export const sampleService2: Service = {
+  title: "Payment Gateway",
+  description: "Processes all payment transactions.",
+  status: "degraded",
+  created_at: "2023-10-01T11:00:00Z",
+  created_by: "finance@example.com",
+};
+
+// Sample data for Incident
+export const sampleIncident: Incident = {
+  title: "Database Outage",
+  status: "resolved",
+  impact: "high",
+  description: "The main database was down for 2 hours.",
+  components_affected: [sampleService1, sampleService2],
+  created_at: "2023-10-02T08:30:00Z",
+  created_by: "support@example.com",
+  updates: [sampleUpdate1, sampleUpdate2, sampleUpdate3],
+};
 
 export default function IncidentCreatePage() {
   return (

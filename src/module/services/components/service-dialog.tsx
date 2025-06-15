@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -23,18 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useServiceStore } from "@/stores/useServiceStore";
+import { Service, useServiceStore } from "@/stores/useServiceStore";
 
-type CreateServiceDialogProps = {
+type ServiceDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  serviceToUpdate: Service | null;
 };
 
-export default function CreateServiceDialog({
+export default function ServiceDialog({
   open,
   setOpen,
-}: CreateServiceDialogProps) {
-  const { operatingOrg } = useOrgStore();
+  serviceToUpdate,
+}: ServiceDialogProps) {
+  const { org } = useOrgStore();
   const { services, setServices } = useServiceStore();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -47,17 +49,37 @@ export default function CreateServiceDialog({
       if (!name) throw new Error("Name is required");
       if (!description) throw new Error("Description is required");
       if (!status) throw new Error("Status is required");
-      const response = await fetchClient("/service/create-service", {
-        method: "POST",
-        body: JSON.stringify({
-          name,
-          description,
-          status,
-          org_id: operatingOrg?._id,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
-      setServices([...(services ?? []), response]);
+      const response = serviceToUpdate
+        ? await fetchClient("/service/update-service", {
+            method: "POST",
+            body: JSON.stringify({
+              service_id: serviceToUpdate?._id,
+              name,
+              description,
+              status,
+              org_id: org?._id,
+            }),
+            headers: { "Content-Type": "application/json" },
+          })
+        : await fetchClient("/service/create-service", {
+            method: "POST",
+            body: JSON.stringify({
+              name,
+              description,
+              status,
+              org_id: org?._id,
+            }),
+            headers: { "Content-Type": "application/json" },
+          });
+      if (serviceToUpdate) {
+        setServices(
+          services?.map((service) =>
+            service._id === serviceToUpdate._id ? response : service
+          ) ?? []
+        );
+      } else {
+        setServices([...(services || []), response]);
+      }
       setOpen(false);
       setName("");
       setDescription("");
@@ -71,13 +93,31 @@ export default function CreateServiceDialog({
     }
   };
 
+  useEffect(() => {
+    if (serviceToUpdate) {
+      setName(serviceToUpdate.name || "");
+      setDescription(serviceToUpdate.description || "");
+      setStatus(serviceToUpdate.status || "unknown");
+    } else {
+      setName("");
+      setDescription("");
+      setStatus("unknown");
+    }
+  }, [serviceToUpdate]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <form>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[95%] md:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Create Service</DialogTitle>
-            <DialogDescription>Create a new service.</DialogDescription>
+            <DialogTitle>
+              {serviceToUpdate ? "Update Service" : "Create Service"}
+            </DialogTitle>
+            <DialogDescription>
+              {serviceToUpdate
+                ? "Update the service."
+                : "Create a new service."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-3">
@@ -135,8 +175,14 @@ export default function CreateServiceDialog({
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={loading} onClick={handleSubmit}>
-              {loading ? "Creating..." : "Create Service"}
+            <Button disabled={loading} onClick={handleSubmit}>
+              {serviceToUpdate
+                ? loading
+                  ? "Updating..."
+                  : "Update Service"
+                : loading
+                ? "Creating..."
+                : "Create Service"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -4,10 +4,11 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Building, Plus } from "lucide-react";
 import CreateOrgDialog from "./components/create-org-dialog";
 import { useOrgStore } from "@/stores/useOrgStore";
+import Link from "next/link";
 
 export default function CreateOrgPage() {
   const [openCreateOrgDialog, setOpenCreateOrgDialog] = useState(false);
-  const { orgs, setOrg } = useOrgStore();
+  const { orgs } = useOrgStore();
   return (
     <>
       <h1 className="text-2xl font-bold">Create or Join an Organization</h1>
@@ -25,19 +26,17 @@ export default function CreateOrgPage() {
           </CardContent>
         </Card>
         {orgs?.map((org) => (
-          <Card
-            className="cursor-pointer"
-            key={org._id}
-            onClick={() => setOrg(org)}
-          >
-            <CardContent className="text-center">
-              <CardTitle className="flex items-center justify-center mb-2">
-                <Building />
-              </CardTitle>
-              <p className="text-sm text-gray-500">{org.name}</p>
-              <p className="text-sm text-gray-500">{org.domain}</p>
-            </CardContent>
-          </Card>
+          <Link href={`/orgs/${org.org_slug}/incidents`} key={org._id}>
+            <Card className="cursor-pointer">
+              <CardContent className="text-center">
+                <CardTitle className="flex items-center justify-center mb-2">
+                  <Building />
+                </CardTitle>
+                <p className="text-sm text-gray-500">{org.name}</p>
+                <p className="text-sm text-gray-500">{org.domain}</p>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
       <CreateOrgDialog

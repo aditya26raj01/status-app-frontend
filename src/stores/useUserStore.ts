@@ -7,8 +7,10 @@ type OrgMembership = {
 };
 
 type User = {
+  _id?: string;
   email?: string;
   full_name?: string;
+  photo_url?: string;
   role?: string;
   team_ids?: string[];
   org_memberships?: OrgMembership[];

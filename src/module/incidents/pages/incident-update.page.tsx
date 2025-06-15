@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CircleCheck, Plus, X } from "lucide-react";
-import { sampleIncident } from "../incidents.module";
 import {
   Select,
   SelectContent,
@@ -23,13 +22,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import AddUpdates from "../components/add-update";
+import { sampleIncident } from "./incident-create.page";
 
 export default function IncidentUpdatePage() {
   const incident = sampleIncident;
   const [isAddUpdateOpen, setIsAddUpdateOpen] = useState(false);
 
   return (
-    <div className="p-4">
+    <div>
       <div className="flex items-center justify-between gap-2 mb-4">
         <div>
           <h1 className="text-2xl font-bold mb-2">{incident.title}</h1>

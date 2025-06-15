@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,6 +7,12 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { useRouter } from "next/router";
+import { fetchClient } from "@/fetch-client";
+import { Service } from "@/stores/useServiceStore";
+import { Incident } from "@/stores/useIncidentsStore";
+import { Org } from "@/stores/useOrgStore";
+import ServiceStatus from "@/components/service-status";
 
 const services = [
   {
@@ -114,27 +120,123 @@ const services = [
 ];
 
 export default function StatusModule() {
-  const pastEvents = services.flatMap((service) =>
-    service.incidents
-      .filter((event) =>
-        moment(event.started_at).isAfter(moment().subtract(7, "days"))
-      )
-      .map((event) => ({ ...event, serviceName: service.name }))
-  );
+  const router = useRouter();
+  const [org, setOrg] = useState<Org>();
+  const [services, setServices] = useState<Service[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchClient(
+          `/status/get-org-status?org_slug=${router.query.org}`
+        );
+        setServices(response.org_services);
+        setIncidents(response.incidents);
+        setOrg(response.org);
+      } catch (error) {
+        setServices([]);
+        setIncidents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const groupedEvents: Record<string, typeof pastEvents> = pastEvents.reduce(
-    (acc: Record<string, typeof pastEvents>, event) => {
-      const date = moment(event.started_at).format("MMM D, YYYY");
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(event);
-      return acc;
-    },
-    {} as Record<string, typeof pastEvents>
-  );
+    if (router.query.org) {
+      fetchServices();
+    }
+  }, [router.query.org]);
+
+  useEffect(() => {
+    if (!loading) {
+      // Set up WebSocket connection
+      const socket = new WebSocket("ws://localhost:8000/ws");
+
+      socket.onopen = () => {
+        console.log("WebSocket connection established");
+      };
+
+      const updateServices = (updatedService: Service & { id: string }) => {
+        const index = services?.findIndex(
+          (service) => service._id === updatedService.id
+        );
+        if (index !== -1) {
+          const newServices = [...(services || [])];
+          newServices[index] = updatedService;
+          setServices(newServices);
+        } else {
+          setServices([...(services || []), updatedService]);
+        }
+      };
+
+      const updateIncidents = (updatedIncident: Incident & { id: string }) => {
+        const index = incidents?.findIndex(
+          (incident) => incident._id === updatedIncident.id
+        );
+        if (index !== -1) {
+          const newIncidents = [...(incidents || [])];
+          newIncidents[index] = updatedIncident;
+          setIncidents(newIncidents);
+        } else {
+          setIncidents([...(incidents || []), updatedIncident]);
+        }
+      };
+
+      const deleteService = (deletedService: Service & { id: string }) => {
+        const index = services?.findIndex(
+          (service) => service._id === deletedService.id
+        );
+        if (index !== -1) {
+          const newServices = [...(services || [])];
+          newServices.splice(index, 1);
+          setServices(newServices);
+        }
+      };
+
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.type === "service") {
+          if (message.action === "delete") {
+            const deletedService = JSON.parse(message.data);
+            deleteService(deletedService);
+          } else {
+            const updatedService = JSON.parse(message.data);
+            updateServices(updatedService);
+          }
+        }
+        if (message.type === "incident") {
+          const updatedIncident = JSON.parse(message.data);
+          console.log(updatedIncident);
+          console.log(incidents);
+          updateIncidents(updatedIncident);
+        }
+      };
+
+      socket.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+      return () => {
+        socket.close();
+      };
+    }
+  }, [loading]);
+
+  const groupedEvents = incidents.reduce((acc, event) => {
+    const date = moment(event.created_at).format("MMM D, YYYY");
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(event);
+    return acc;
+  }, {} as Record<string, Incident[]>);
 
   return (
-    <>
-      <h1 className="text-3xl font-bold">Acme Inc</h1>
+    <div className="px-4">
+      <h1 className="text-3xl font-bold">{org?.name}</h1>
+      <p className="text-sm text-gray-500">{org?.domain}</p>
       {(() => {
         const operationalCount = services.filter(
           (service) => service.status === "operational"
@@ -166,19 +268,9 @@ export default function StatusModule() {
             >
               <div className="flex justify-between items-center">
                 <h2 className="font-bold">{service.name}</h2>
-                <h4
-                  className={`text-sm ${
-                    service.status === "operational"
-                      ? "text-green-500"
-                      : service.status === "degraded"
-                      ? "text-orange-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {service.status}
-                </h4>
+                <ServiceStatus service={service} />
               </div>
-              <div className="flex space-x-1.5 mt-2">
+              {/* <div className="flex space-x-1.5 mt-2">
                 {service.incidents.map((event, idx) => (
                   <div
                     key={idx}
@@ -191,7 +283,7 @@ export default function StatusModule() {
                     }`}
                   />
                 ))}
-              </div>
+              </div> */}
             </div>
           );
         })}
@@ -200,14 +292,9 @@ export default function StatusModule() {
         <h2 className="text-2xl font-bold">Past Incidents</h2>
         {Object.entries(groupedEvents).map(([date, incidents]) => (
           <div key={date} className="mt-4">
-            <h3 className="font-semibold text-lg border-b border-gray-200">
-              {date}
-            </h3>
+            <h3 className="font-semibold text-lg border-b">{date}</h3>
             {incidents.map((event, idx) => (
-              <div
-                key={idx}
-                className="mt-2 border-1 border-gray-200 px-4 py-3 rounded-lg"
-              >
+              <div key={idx} className="mt-2 border-1 px-4 py-3 rounded-lg">
                 <div className="flex gap-4 items-center">
                   <Badge
                     className={`border-0 w-[100] rounded-[5] ${
@@ -227,7 +314,7 @@ export default function StatusModule() {
                   </h4>
                 </div>
                 <p className="text-sm mt-2">{event.description}</p>
-                {event.updates.length > 0 && (
+                {event.updates && event.updates.length > 0 && (
                   <>
                     <p className="text-[18px] font-bold mt-4">Updates</p>
                     <Accordion type="single" collapsible className="w-full">
@@ -238,8 +325,8 @@ export default function StatusModule() {
                           .slice(0, event.updates.length - 1)
                           .sort((a, b) => {
                             return (
-                              new Date(b.created_at).getTime() -
-                              new Date(a.created_at).getTime()
+                              new Date(b.created_at || "").getTime() -
+                              new Date(a.created_at || "").getTime()
                             );
                           });
                         return (
@@ -286,7 +373,7 @@ export default function StatusModule() {
                     </Accordion>
                   </>
                 )}
-                {!event.updates.length && (
+                {(!event.updates || event.updates.length === 0) && (
                   <p className="text-sm mt-4 mb-4">No updates yet</p>
                 )}
                 <p className="text-xs text-gray-500 mt-2">
@@ -298,9 +385,9 @@ export default function StatusModule() {
                     Affected services:
                   </p>
 
-                  {event.service_ids.map((id, idx) => (
+                  {event.affected_services?.map((service, idx) => (
                     <Badge key={idx} className="bg-gray-200 text-gray-700">
-                      {id}
+                      {services.find((s) => s._id === service.service_id)?.name}
                     </Badge>
                   ))}
                 </div>
@@ -309,6 +396,6 @@ export default function StatusModule() {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }

@@ -18,6 +18,7 @@ import {
 import { useUserStore } from "@/stores/useUserStore";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
+import { Badge } from "./badge";
 
 export function NavUser() {
   const { user } = useUserStore();
@@ -42,15 +43,15 @@ export function NavUser() {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user?.photoURL || ""}
-                  alt={user?.displayName || ""}
+                  src={user?.photo_url || ""}
+                  alt={user?.full_name || ""}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user?.full_name?.charAt(0)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {user?.displayName}
-                </span>
+                <span className="truncate font-medium">{user?.full_name}</span>
                 <span className="truncate text-xs">{user?.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -66,16 +67,19 @@ export function NavUser() {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user?.photoURL || ""}
-                    alt={user?.displayName || ""}
+                    src={user?.photo_url || ""}
+                    alt={user?.full_name || ""}
                   />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
-                    {user?.displayName}
+                    {user?.full_name}
                   </span>
                   <span className="truncate text-xs">{user?.email}</span>
+                  <Badge variant="outline" className="text-xs mt-2">
+                    {user?.current_org?.role}
+                  </Badge>
                 </div>
               </div>
             </DropdownMenuLabel>

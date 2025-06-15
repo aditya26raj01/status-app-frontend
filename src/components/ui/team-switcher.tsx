@@ -23,7 +23,7 @@ import Link from "next/link";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
-  const { orgs, org, setOrg } = useOrgStore();
+  const { orgs, org } = useOrgStore();
 
   return (
     <SidebarMenu>
@@ -77,17 +77,15 @@ export function TeamSwitcher() {
               {orgs?.length === 0 ? "No Organizations" : "Organizations"}
             </DropdownMenuLabel>
             {orgs?.map((org, index) => (
-              <DropdownMenuItem
-                key={org.name}
-                onClick={() => setOrg(org)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  {org.name?.charAt(0).toUpperCase()}
-                </div>
-                {org.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
+              <Link href={`/orgs/${org.org_slug}/incidents`} key={org.name}>
+                <DropdownMenuItem key={org.name} className="gap-2 p-2">
+                  <div className="flex size-6 items-center justify-center rounded-md border">
+                    {org.name?.charAt(0).toUpperCase()}
+                  </div>
+                  {org.name}
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
             ))}
             <DropdownMenuSeparator />
             <Link href="/orgs">

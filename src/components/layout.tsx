@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return children;
   }
 
-  if (router.pathname === "/orgs") {
+  if (router.pathname === "/orgs" || router.pathname === "/status/[org]") {
     return (
       <div className="container mx-auto max-w-screen-lg py-20">{children}</div>
     );
@@ -20,62 +20,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <main className="w-full relative">
-        <div className="container mx-auto max-w-screen-lg py-20">
-          <SidebarTrigger className="absolute top-0 left-0 cursor-pointer" />
+        <div className="h-12 gap-4 flex items-center px-4 shadow-md">
+          <SidebarTrigger className="cursor-pointer" />
+          <div className="text-white font-bold text-xl">Status App</div>
+        </div>
+        <div className="container mx-auto max-w-screen-lg py-20 px-4 sm:px-6 lg:px-8">
           {children}
         </div>
       </main>
     </SidebarProvider>
-    // <div className="container mx-auto max-w-screen-lg py-20">
-    //   <div className="fixed top-4 right-4 flex items-center space-x-4">
-    //     <div className="flex h-5 items-center space-x-4 text-sm">
-    //       <Link href="/org">
-    //         <Button variant="link" className="text-white cursor-pointer">
-    //           Organizations
-    //         </Button>
-    //       </Link>
-    //       <Separator orientation="vertical" />
-    //       <Button variant="link" className="text-white cursor-pointer">
-    //         Docs
-    //       </Button>
-    //       <Separator orientation="vertical" />
-    //       <Button variant="link" className="text-white cursor-pointer">
-    //         Source
-    //       </Button>
-    //       <Separator orientation="vertical" />
-    //       {user ? (
-    //         <>
-    //           <Button
-    //             variant="link"
-    //             className="text-white cursor-pointer"
-    //             onClick={handleLogout}
-    //           >
-    //             Logout
-    //           </Button>
-    //           <Separator orientation="vertical" />
-    //           <Avatar>
-    //             <AvatarImage
-    //               src={user.photoURL || ""}
-    //               alt={user.displayName || ""}
-    //             />
-    //             <AvatarFallback className="text-gray-700 text-2xl">
-    //               {user.displayName?.charAt(0)}
-    //             </AvatarFallback>
-    //           </Avatar>
-    //         </>
-    //       ) : (
-    //         <Button
-    //           variant="link"
-    //           className="text-white cursor-pointer"
-    //           onClick={handleLogin}
-    //         >
-    //           Login
-    //         </Button>
-    //       )}
-    //     </div>
-    //   </div>
-    //   {children}
-    // </div>
-    // </>
   );
 }
