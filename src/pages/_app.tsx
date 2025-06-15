@@ -1,14 +1,21 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { AuthProvider } from "@/context/auth.context";
 import AuthGuard from "@/provider/authguard.provider";
+import Layout from "@/components/layout";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ClientHydrator } from "@/components/client-hydrator";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ClientHydrator />
       <AuthGuard>
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </AuthGuard>
-    </AuthProvider>
+      <Toaster />
+    </ThemeProvider>
   );
 }

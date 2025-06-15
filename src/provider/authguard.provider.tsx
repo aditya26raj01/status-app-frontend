@@ -1,39 +1,44 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useAuth } from "../context/auth.context";
-import {
-  ALWAYS_PUBLIC_ROUTES,
-  LOGGED_OUT_ONLY_ROUTES,
-  PROTECTED_ROUTES,
-} from "../lib/routes";
+import { useUserStore } from "@/stores/useUserStore";
+import { useOrgStore } from "@/stores/useOrgStore";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: userLoading } = useUserStore();
+  const { org, clearOrg } = useOrgStore();
   const router = useRouter();
 
   const path = router.pathname;
 
   useEffect(() => {
-    if (loading) return;
+    if (userLoading) return;
 
-    if (ALWAYS_PUBLIC_ROUTES.includes(path)) {
-      return;
+    if (path === "/" && user) {
+      if (user?.org_memberships?.length === 0 || !user.current_org) {
+        router.replace("/orgs");
+      } else {
+        router.replace(`/orgs/${user?.current_org.org_slug}`);
+      }
     }
+  }, [path, user, userLoading]);
 
-    if (LOGGED_OUT_ONLY_ROUTES.includes(path) && user) {
-      router.replace("/dashboard"); // redirect logged-in user away from login/signup
+  useEffect(() => {
+    if (org) {
+      router.replace(`/orgs/${org.org_slug}`);
     }
+  }, [org]);
 
-    if (PROTECTED_ROUTES.includes(path) && !user) {
-      router.replace("/login"); // redirect unauthenticated user from protected routes
+  useEffect(() => {
+    if (path === "/orgs") {
+      clearOrg();
     }
-  }, [router.pathname, user, loading]);
+  }, [path]);
 
-  if (LOGGED_OUT_ONLY_ROUTES.includes(path) && user) {
+  if (userLoading) {
     return null;
   }
 
-  if (PROTECTED_ROUTES.includes(path) && !user) {
+  if (path === "/" && user) {
     return null;
   }
 
