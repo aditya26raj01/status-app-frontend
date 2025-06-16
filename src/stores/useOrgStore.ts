@@ -9,6 +9,7 @@ export type Org = {
   created_by?: string;
   updated_at?: string;
   updated_by?: string;
+  created_by_username?: string;
 };
 
 type OrgStore = {

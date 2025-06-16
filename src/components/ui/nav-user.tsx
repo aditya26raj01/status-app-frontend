@@ -19,9 +19,11 @@ import { useUserStore } from "@/stores/useUserStore";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
 import { Badge } from "./badge";
+import { useOrgStore } from "@/stores/useOrgStore";
 
 export function NavUser() {
   const { user } = useUserStore();
+  const { org } = useOrgStore();
   const { isMobile } = useSidebar();
 
   const handleLogout = async () => {
@@ -31,7 +33,9 @@ export function NavUser() {
       toast.error("Failed to logout");
     }
   };
-
+  const userRole = user?.org_memberships?.find(
+    (membership) => membership.org_id === org?._id
+  )?.role;
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -70,7 +74,9 @@ export function NavUser() {
                     src={user?.photo_url || ""}
                     alt={user?.full_name || ""}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user?.full_name?.charAt(0)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
@@ -78,7 +84,7 @@ export function NavUser() {
                   </span>
                   <span className="truncate text-xs">{user?.email}</span>
                   <Badge variant="outline" className="text-xs mt-2">
-                    {user?.current_org?.role}
+                    {userRole}
                   </Badge>
                 </div>
               </div>

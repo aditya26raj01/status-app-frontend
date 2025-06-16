@@ -4,6 +4,7 @@ export type IncidentUpdate = {
   message?: string;
   created_by?: string;
   created_at?: string;
+  created_by_username?: string;
 };
 
 export type AffectedService = {
@@ -13,6 +14,7 @@ export type AffectedService = {
 
 export type Incident = {
   _id?: string;
+  created_by_username?: string;
   title?: string;
   description?: string;
   status?: string;

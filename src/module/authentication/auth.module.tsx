@@ -1,19 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { FcGoogle } from "react-icons/fc";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { Input } from "@/components/ui/input";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
 
 export default function AuthModule() {
-  const handleLogin = async () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleEmailSignIn = async () => {
+    setLoading(true);
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Successfully signed in");
     } catch (error) {
-      toast.error("Failed to login");
+      toast.error("Failed to sign in");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-4xl font-bold">Statusapp</h1>
@@ -27,13 +36,27 @@ export default function AuthModule() {
           </CardTitle>
         </CardHeader>
         <CardFooter className="flex-col gap-2">
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full"
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full"
+          />
           <Button
             type="submit"
             className="w-full cursor-pointer"
-            onClick={handleLogin}
+            onClick={handleEmailSignIn}
+            disabled={loading}
           >
-            <FcGoogle className="text-2xl" />
-            Continue with Google
+            {loading ? "Signing in..." : "Sign in with Email"}
           </Button>
         </CardFooter>
       </Card>

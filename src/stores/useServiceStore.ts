@@ -3,6 +3,7 @@ import { create } from "zustand";
 export type Service = {
   _id?: string;
   created_at?: string;
+  created_by_username?: string;
   created_by?: string;
   updated_at?: string;
   updated_by?: string;

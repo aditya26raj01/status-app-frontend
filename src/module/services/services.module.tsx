@@ -8,6 +8,7 @@ import { fetchClient } from "@/fetch-client";
 import { useOrgStore } from "@/stores/useOrgStore";
 import ServiceCard from "./components/service-card";
 import DeleteService from "./components/delete-service";
+import { useUserStore } from "@/stores/useUserStore";
 
 export default function ServicesModule() {
   const { org } = useOrgStore();
@@ -17,6 +18,12 @@ export default function ServicesModule() {
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   const { setServices, services, loading, clearServices } = useServiceStore();
+  const { user } = useUserStore();
+
+  const isAdmin = user?.org_memberships?.some(
+    (membership) =>
+      membership.org_id === org?._id && membership.role === "admin"
+  );
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -38,18 +45,20 @@ export default function ServicesModule() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Services</h1>
-        <Button
-          variant="outline"
-          className="cursor-pointer"
-          onClick={() => {
-            setOpenServiceDialog(true);
-            setServiceToUpdate(null);
-            setServiceToDelete(null);
-          }}
-        >
-          <Plus />
-          Create Service
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => {
+              setOpenServiceDialog(true);
+              setServiceToUpdate(null);
+              setServiceToDelete(null);
+            }}
+          >
+            <Plus />
+            Create Service
+          </Button>
+        )}
       </div>
       <Separator className="mt-4 mb-4" />
       {(() => {
@@ -79,6 +88,8 @@ export default function ServicesModule() {
                 setOpenServiceDialog={setOpenServiceDialog}
                 setServiceToDelete={setServiceToDelete}
                 setOpenDeleteServiceDialog={setOpenDeleteServiceDialog}
+                user={user}
+                org={org}
               />
             ))}
           </div>

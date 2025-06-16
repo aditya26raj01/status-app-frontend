@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Incident } from "@/stores/useIncidentsStore";
 import IncidentStatus from "@/components/incident-status";
 import { Eye, Trash } from "lucide-react";
+import { User } from "@/stores/useUserStore";
+import { Org } from "@/stores/useOrgStore";
 
 interface IncidentCardProps {
   incident: Incident;
@@ -11,6 +13,8 @@ interface IncidentCardProps {
   setIncidentToUpdate: (incident: Incident) => void;
   setIncidentToDelete: (incident: Incident) => void;
   setOpenDeleteIncidentDialog: (open: boolean) => void;
+  user: User | null;
+  org: Org | null;
 }
 
 export default function IncidentCard({
@@ -20,7 +24,14 @@ export default function IncidentCard({
   setOpenIncidentDialog,
   setIncidentToDelete,
   setOpenDeleteIncidentDialog,
+  user,
+  org,
 }: IncidentCardProps) {
+  const isAdmin = user?.org_memberships?.some(
+    (membership: { org_id: string; role: string }) =>
+      membership.org_id === org?._id && membership.role === "admin"
+  );
+
   return (
     <div key={incident._id} className="border rounded-md p-4">
       <div className="flex items-center gap-4">
@@ -36,6 +47,9 @@ export default function IncidentCard({
             <p className="text-sm text-muted-foreground">
               {incident.description}
             </p>
+            <p className="text-sm text-muted-foreground">
+              Created by: {incident.created_by_username}
+            </p>
           </div>
           <div className="flex flex-col items-center gap-2">
             <Button
@@ -49,17 +63,19 @@ export default function IncidentCard({
               <Eye />
               View
             </Button>
-            <Button
-              variant="destructive"
-              className="cursor-pointer w-full"
-              onClick={() => {
-                setOpenDeleteIncidentDialog(true);
-                setIncidentToDelete(incident);
-              }}
-            >
-              <Trash />
-              Delete
-            </Button>
+            {isAdmin && (
+              <Button
+                variant="destructive"
+                className="cursor-pointer w-full"
+                onClick={() => {
+                  setOpenDeleteIncidentDialog(true);
+                  setIncidentToDelete(incident);
+                }}
+              >
+                <Trash />
+                Delete
+              </Button>
+            )}
           </div>
         </div>
       </div>

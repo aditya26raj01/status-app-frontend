@@ -6,7 +6,7 @@ type OrgMembership = {
   org_slug: string;
 };
 
-type User = {
+export type User = {
   _id?: string;
   email?: string;
   full_name?: string;

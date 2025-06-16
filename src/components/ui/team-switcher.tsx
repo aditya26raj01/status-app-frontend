@@ -20,10 +20,16 @@ import {
 } from "@/components/ui/sidebar";
 import { useOrgStore } from "@/stores/useOrgStore";
 import Link from "next/link";
+import { useUserStore } from "@/stores/useUserStore";
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar();
   const { orgs, org } = useOrgStore();
+  const { user } = useUserStore();
+
+  const isAdmin =
+    user?.org_memberships?.find((membership) => membership.org_id === org?._id)
+      ?.role === "admin";
 
   return (
     <SidebarMenu>
@@ -56,9 +62,11 @@ export function TeamSwitcher() {
                   <Plus className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    Create Organization
-                  </span>
+                  {isAdmin && (
+                    <span className="truncate font-medium">
+                      Create Organization
+                    </span>
+                  )}
                   {/* <span className="truncate text-xs">
                     {operatingOrg?.domain}
                     </span> */}
@@ -87,17 +95,21 @@ export function TeamSwitcher() {
                 </DropdownMenuItem>
               </Link>
             ))}
-            <DropdownMenuSeparator />
-            <Link href="/orgs">
-              <DropdownMenuItem className="gap-2 p-2">
-                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
-                  <Plus className="size-4" />
-                </div>
-                <div className="text-muted-foreground font-medium">
-                  Add Organization
-                </div>
-              </DropdownMenuItem>
-            </Link>
+            {isAdmin && (
+              <>
+                <DropdownMenuSeparator />
+                <Link href="/orgs">
+                  <DropdownMenuItem className="gap-2 p-2">
+                    <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+                      <Plus className="size-4" />
+                    </div>
+                    <div className="text-muted-foreground font-medium">
+                      Add Organization
+                    </div>
+                  </DropdownMenuItem>
+                </Link>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

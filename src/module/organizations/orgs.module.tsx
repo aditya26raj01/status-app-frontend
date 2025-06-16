@@ -18,7 +18,7 @@ export default function CreateOrgPage() {
           className="cursor-pointer"
           onClick={() => setOpenCreateOrgDialog(true)}
         >
-          <CardContent className="text-center">
+          <CardContent className="text-center flex flex-col items-center justify-center h-full">
             <CardTitle className="flex items-center justify-center mb-2">
               <Plus />
             </CardTitle>
@@ -34,6 +34,9 @@ export default function CreateOrgPage() {
                 </CardTitle>
                 <p className="text-sm text-gray-500">{org.name}</p>
                 <p className="text-sm text-gray-500">{org.domain}</p>
+                <p className="text-sm text-gray-500">
+                  Created by: {org.created_by_username}
+                </p>
               </CardContent>
             </Card>
           </Link>

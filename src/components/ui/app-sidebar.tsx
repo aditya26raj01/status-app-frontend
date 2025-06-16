@@ -5,6 +5,7 @@ import {
   Monitor,
   Server,
   SquareArrowOutUpRight,
+  Users,
 } from "lucide-react";
 import { NavUser } from "@/components/ui/nav-user";
 import { TeamSwitcher } from "@/components/ui/team-switcher";
@@ -29,7 +30,7 @@ import Link from "next/link";
 const links = [
   { label: "Incidents", href: "/incidents", icon: AlertCircle },
   { label: "Services", href: "/services", icon: Server },
-  // { label: "Teams", href: "/teams", icon: Users },
+  { label: "Teams", href: "/teams", icon: Users },
   { label: "Logs", href: "/logs", icon: FileText },
   { label: "Status", href: "/status", icon: Monitor },
 ];

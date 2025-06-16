@@ -8,6 +8,7 @@ import { fetchClient } from "@/fetch-client";
 import IncidentCard from "./components/incident-card";
 import IncidentDialog from "./components/incident-dialog";
 import DeleteIncident from "./components/delete-incident";
+import { useUserStore } from "@/stores/useUserStore";
 
 export default function IncidentsModule() {
   const { org } = useOrgStore();
@@ -21,6 +22,13 @@ export default function IncidentsModule() {
     useState(false);
   const [incidentToDelete, setIncidentToDelete] = useState<Incident | null>(
     null
+  );
+
+  const { user } = useUserStore();
+
+  const isAdmin = user?.org_memberships?.some(
+    (membership) =>
+      membership.org_id === org?._id && membership.role === "admin"
   );
 
   useEffect(() => {
@@ -43,18 +51,20 @@ export default function IncidentsModule() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Incidents</h1>
-        <Button
-          variant="outline"
-          className="cursor-pointer"
-          onClick={() => {
-            setOpenIncidentDialog(true);
-            setIncidentToUpdate(null);
-            setIncidentToDelete(null);
-          }}
-        >
-          <Plus />
-          Create Incident
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => {
+              setOpenIncidentDialog(true);
+              setIncidentToUpdate(null);
+              setIncidentToDelete(null);
+            }}
+          >
+            <Plus />
+            Create Incident
+          </Button>
+        )}
       </div>
       <Separator className="mt-4 mb-4" />
       {(() => {
@@ -86,6 +96,8 @@ export default function IncidentsModule() {
                 setOpenIncidentDialog={setOpenIncidentDialog}
                 setIncidentToDelete={setIncidentToDelete}
                 setOpenDeleteIncidentDialog={setOpenDeleteIncidentDialog}
+                user={user}
+                org={org}
               />
             ))}
           </div>

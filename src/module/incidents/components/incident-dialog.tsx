@@ -73,6 +73,7 @@ export default function IncidentDialog({
                 service_id: service._id,
                 status: service.status,
                 created_at: service.created_at,
+                service_name: service.name,
               })),
               started_at: startedAt,
               resolved_at: resolvedAt,
@@ -81,6 +82,8 @@ export default function IncidentDialog({
                 message: update.message,
                 created_at: update.created_at,
                 created_by: update.created_by || user?._id,
+                created_by_username:
+                  update.created_by_username || user?.full_name,
               })),
             }),
             headers: { "Content-Type": "application/json" },
@@ -95,6 +98,7 @@ export default function IncidentDialog({
               affected_services: servicesAffected.map((service) => ({
                 service_id: service._id,
                 status: service.status,
+                service_name: service.name,
               })),
               started_at: startedAt,
               resolved_at: resolvedAt,
@@ -335,15 +339,19 @@ export default function IncidentDialog({
                             )
                           }
                         />
-                        <div className="flex flex-col gap-2 text-sm">
-                          <Label htmlFor={`update-${index}`}>
-                            Created at:{" "}
-                            {new Date(update.created_at || "").toLocaleString()}
-                          </Label>
-                          <Label htmlFor={`update-${index}`}>
-                            Created by: {update.created_by}
-                          </Label>
-                        </div>
+                        {update.created_by && (
+                          <div className="flex flex-col gap-2 text-sm">
+                            <Label htmlFor={`update-${index}`}>
+                              Created at:{" "}
+                              {new Date(
+                                update.created_at || ""
+                              ).toLocaleString()}
+                            </Label>
+                            <Label htmlFor={`update-${index}`}>
+                              Created by: {update.created_by_username}
+                            </Label>
+                          </div>
+                        )}
                         {update.created_by === undefined && (
                           <Button
                             variant="outline"
