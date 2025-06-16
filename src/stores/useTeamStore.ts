@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { User } from "./useUserStore";
 
 export type TeamMember = {
   user_id: string;
@@ -17,13 +18,17 @@ export type Team = {
 type TeamStore = {
   teams: Team[] | null;
   loading: boolean;
+  orgMembers: User[] | null;
   setTeams: (teams: Team[]) => void;
+  setOrgMembers: (members: User[]) => void;
   clearTeams: () => void;
 };
 
 export const useTeamStore = create<TeamStore>((set) => ({
   teams: null,
   loading: true,
+  orgMembers: null,
   setTeams: (teams) => set({ teams, loading: false }),
+  setOrgMembers: (members) => set({ orgMembers: members }),
   clearTeams: () => set({ teams: null, loading: false }),
 }));

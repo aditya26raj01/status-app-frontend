@@ -36,7 +36,7 @@ export default function TeamDialog({
 }: TeamDialogProps) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
+  const { orgMembers, setOrgMembers } = useTeamStore();
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const { org } = useOrgStore();
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -47,7 +47,7 @@ export default function TeamDialog({
       try {
         setLoadingUsers(true);
         const response = await fetchClient(`/user/org/${org?._id}/users`);
-        setUsers(response);
+        setOrgMembers(response);
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : "Failed to fetch users"
@@ -146,7 +146,7 @@ export default function TeamDialog({
                     <Loader2 className="w-4 h-4 animate-spin" />
                   </div>
                 ) : (
-                  users.map((user) => {
+                  orgMembers?.map((user) => {
                     const isSelected = selectedUsers.some(
                       (u) => u._id === user._id
                     );

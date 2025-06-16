@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { fetchClient } from "@/fetch-client";
 import { useOrgStore } from "@/stores/useOrgStore";
+import { useTeamStore } from "@/stores/useTeamStore";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -23,6 +24,7 @@ export default function CreateUserDialog({
   open,
   setOpen,
 }: CreateUserDialogProps) {
+  const { setOrgMembers, orgMembers } = useTeamStore();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -32,18 +34,22 @@ export default function CreateUserDialog({
       setLoading(true);
       if (!email) throw new Error("Email is required");
       if (!fullName) throw new Error("Full name is required");
-      await fetchClient(`/user/create-user-in-org?org_id=${org?._id}`, {
-        method: "POST",
-        body: JSON.stringify({
-          email,
-          full_name: fullName,
-        }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const newUser = await fetchClient(
+        `/user/create-user-in-org?org_id=${org?._id}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email,
+            full_name: fullName,
+          }),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       toast.success("User created successfully");
       setOpen(false);
       setEmail("");
       setFullName("");
+      setOrgMembers([...(orgMembers || []), newUser]);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to create user"
