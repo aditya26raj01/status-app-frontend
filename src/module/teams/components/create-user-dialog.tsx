@@ -28,12 +28,14 @@ export default function CreateUserDialog({
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
   const { org } = useOrgStore();
   const handleSubmit = async () => {
     try {
       setLoading(true);
       if (!email) throw new Error("Email is required");
       if (!fullName) throw new Error("Full name is required");
+      if (!password) throw new Error("Password is required");
       const newUser = await fetchClient(
         `/user/create-user-in-org?org_id=${org?._id}`,
         {
@@ -41,6 +43,7 @@ export default function CreateUserDialog({
           body: JSON.stringify({
             email,
             full_name: fullName,
+            password,
           }),
           headers: { "Content-Type": "application/json" },
         }
@@ -49,6 +52,7 @@ export default function CreateUserDialog({
       setOpen(false);
       setEmail("");
       setFullName("");
+      setPassword("");
       setOrgMembers([...(orgMembers || []), newUser]);
     } catch (error) {
       toast.error(
@@ -90,6 +94,18 @@ export default function CreateUserDialog({
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-3">
+              <Input
+                id="user-password"
+                name="user-password"
+                placeholder="Password"
+                type="password"
+                disabled={loading}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
           </div>
