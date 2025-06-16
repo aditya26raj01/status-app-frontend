@@ -21,7 +21,7 @@ export const ClientHydrator = () => {
             method: "POST",
             body: JSON.stringify({
               email: user.email,
-              full_name: user.displayName,
+              full_name: user.displayName || "Dummy User",
               photo_url: user.photoURL,
             }),
             headers: { "Content-Type": "application/json" },
